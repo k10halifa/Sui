@@ -66,12 +66,7 @@ public class SuiConfigManager extends ConfigManager {
     @Nullable
     public SuiConfig.PackageEntry find(int uid) {
         synchronized (this) {
-            SuiConfig.PackageEntry entry = findLocked(uid);
-            if (entry != null && globalAutoGrantEnabled && entry.isDenied()) {
-                int flags = (entry.flags & ~SuiConfig.MASK_PERMISSION) | SuiConfig.FLAG_ALLOWED;
-                return new SuiConfig.PackageEntry(uid, flags);
-            }
-            return entry;
+            return findLocked(uid);
         }
     }
 

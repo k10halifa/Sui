@@ -1,4 +1,4 @@
 [submodule "api"]
 	path = api
-	url = git@github.com:RikkaApps/Shizuku-API.git
-	branch = master
+	url = https://github.com/hbd462762-bot/Shizuku-API.git
+	branch = sui-v18.9.13
