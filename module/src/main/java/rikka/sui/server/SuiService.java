@@ -213,6 +213,11 @@ public class SuiService extends Service<SuiUserServiceManager, SuiClientManager,
     }
 
     @Override
+    protected boolean isGlobalAutoGrantEnabled() {
+        return configManager.isGlobalAutoGrantEnabled();
+    }
+
+    @Override
     public void attachApplication(IShizukuApplication application, Bundle args) {
         if (application == null || args == null) {
             return;
