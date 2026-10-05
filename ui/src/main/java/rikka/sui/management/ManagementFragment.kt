@@ -252,11 +252,7 @@ class ManagementFragment : AppFragment() {
     }
 
     private fun onError(e: Throwable) {
-        binding.apply {
-            swipeRefresh.isEnabled = true
-            swipeRefresh.isRefreshing = false
-            list.isVisible = true
-        }
+        showContent()
 
         val detail = e.localizedMessage ?: e.javaClass.simpleName
         Toast.makeText(
@@ -267,15 +263,20 @@ class ManagementFragment : AppFragment() {
     }
 
     private fun onSuccess(data: Resource<List<AppInfo>?>) {
-        binding.apply {
-            swipeRefresh.isEnabled = true
-            swipeRefresh.isRefreshing = false
-            list.isVisible = true
-        }
+        showContent()
 
         data.data?.let {
             adapter.updateData(it)
             binding.list.doOnNextLayout { alignGlobalAutoGrantAction() }
         }
+    }
+
+    private fun showContent() {
+        binding.apply {
+            swipeRefresh.isEnabled = true
+            swipeRefresh.isRefreshing = false
+            list.isVisible = true
+        }
+        requireAppActivity().findViewById<View>(R.id.toolbar_container).isVisible = true
     }
 }
