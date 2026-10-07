@@ -55,7 +55,7 @@ After the files are correctly copied, use `rish` as 'sh'.
 
 ## Application development guide
 
-https://github.com/RikkaApps/Shizuku-API
+https://github.com/k10halifa/Shizuku-API
 
 ## Build
 
