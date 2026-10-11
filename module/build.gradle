@@ -204,6 +204,11 @@ afterEvaluate {
         task("zip${variantCapped}", type: Zip) {
             dependsOn("prepareMagiskFiles${variantCapped}")
             from magiskDir
+            eachFile { details ->
+                if (details.name.endsWith('.sh')) {
+                    details.mode = 0755
+                }
+            }
             archiveFileName = zipName
             destinationDirectory = outDir
         }

@@ -83,6 +83,8 @@ Gradle tasks:
 
    Install the zip and reboot the device.
 
+For KernelSU, the module's Action button reports whether the Sui service process is running. Boot and service-hook diagnostics are appended to `/data/local/tmp/sui_debug.log`.
+
 ## Internals
 
 Sui requires [Magisk](https://github.com/topjohnwu/Magisk) (and [Riru](https://github.com/RikkaApps) for non-Zygisk version). Magisk allows us to run processes as uid 0 and a "do anything" SELinux context. Riru or Zygisk allows us to inject into system server process and app processes.
