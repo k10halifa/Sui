@@ -2,13 +2,22 @@
 MODDIR=${0%/*}
 MODULE_ID=$(basename "$MODDIR")
 FLAVOR=@FLAVOR@
+LOG_FILE=/data/local/tmp/sui_debug.log
+
+log_debug() {
+  printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >> "$LOG_FILE" 2>/dev/null
+}
+
+log_debug "post-fs-data.sh: started for $MODULE_ID ($FLAVOR)"
 
 if [ "$ZYGISK_ENABLED" = false ] && [ "$FLAVOR" = "zygisk" ]; then
+  log_debug "post-fs-data.sh: Zygisk is disabled; skipping"
   log -p w -t "Sui" "Zygisk is disabled, skip zygisk-flavor script"
   exit 1
 fi
 
 if [ "$ZYGISK_ENABLED" = true ] && [ "$FLAVOR" = "riru" ]; then
+  log_debug "post-fs-data.sh: Zygisk is enabled; skipping Riru flavor"
   log -p w -t "Sui" "Zygisk is enabled, skip riru-flavor script"
   exit 1
 fi
@@ -68,4 +77,8 @@ ln -s "$MODDIR/bin/sui" "$MODDIR/bin/uninstall"
 
 # Run Sui server
 chmod 700 "$MODDIR"/bin/sui
-exec "$MODDIR"/bin/sui "$MODDIR" "$adb_root_exit"
+log_debug "post-fs-data.sh: launching Sui server"
+"$MODDIR"/bin/sui "$MODDIR" "$adb_root_exit" >> "$LOG_FILE" 2>&1
+SUI_EXIT_CODE=$?
+log_debug "post-fs-data.sh: Sui launcher exited with status $SUI_EXIT_CODE"
+exit "$SUI_EXIT_CODE"

@@ -41,6 +41,8 @@ done
 ui_print "- Extracting module files"
 
 extract "$ZIPFILE" 'module.prop' "$MODPATH"
+extract "$ZIPFILE" 'action.sh' "$MODPATH"
+extract "$ZIPFILE" 'service.sh' "$MODPATH"
 extract "$ZIPFILE" 'post-fs-data.sh' "$MODPATH"
 extract "$ZIPFILE" 'uninstall.sh' "$MODPATH"
 extract "$ZIPFILE" 'sepolicy.rule' "$MODPATH"
@@ -84,6 +86,9 @@ mv "$MODPATH/bin/libmain.so" "$MODPATH/bin/sui"
 mv "$MODPATH/bin/libadbd_wrapper.so" "$MODPATH/bin/adbd_wrapper"
 
 set_perm_recursive "$MODPATH" 0 0 0755 0644
+set_perm "$MODPATH/action.sh" 0 0 0755
+set_perm "$MODPATH/service.sh" 0 0 0755
+set_perm "$MODPATH/post-fs-data.sh" 0 0 0755
 
 extract "$ZIPFILE" 'sui.dex' "$MODPATH"
 extract "$ZIPFILE" 'sui.apk' "$MODPATH"
