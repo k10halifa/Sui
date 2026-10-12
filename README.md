@@ -1,112 +1,69 @@
 # Sui
 
-Modern super user interface (SUI) implementation on Android. <del>The name, Sui, also comes from [a character](https://www.pixiv.net/artworks/71435059).</del>
+Modern Superuser Interface (SUI) implementation on Android, redesigned with **Material Design 3 (Material You / M3)**.
 
-## Introduction
+---
 
-Sui provides Java APIs, [Shizuku API](https://github.com/RikkaApps/Shizuku-API), for root apps. It mainly provides the ability to use Android APIs directly (almost in Java as the identity of the root, and start app's own AIDL-style Java service under root. This will make root app development much more comfortable.
+## Overview
 
-Another advantage is that Sui does not add binaries to `PATH` and does not install a manager app. This means we no longer need to spend a huge amount of time to fight with apps that detect them.
+Sui provides modern Java APIs based on the [Shizuku API](https://github.com/k10halifa/Shizuku-API) architecture for root-enabled applications. It allows root apps to execute Android framework APIs directly in Java under root privileges and register their own AIDL-style Java services.
 
-To be clear, the full implementation of "root" is far more than "su" itself, there is a lot of hard work to be done before. Sui is not a full root solution, it requires Magisk to run.
+Unlike traditional root management solutions, Sui operates directly at the framework level:
+- **No Binaries in `PATH`:** Does not inject standalone su binaries into system paths, significantly minimizing root detection vectors.
+- **No Standalone Manager App:** All controls and permissions are deeply integrated directly into the system settings and system UI.
+- **Material Design 3 (M3) UI:** Built with Google's modern Material You / M3 design language for confirmation dialogs and management interfaces.
 
-<details>
-  <summary>Why "su" is unfriendly for app development</summary>
+---
 
-The "su", a "shell" runs as root, is too far from the Android world.
+## Key Highlights & What's New (v18.9.15)
 
-To explain this, we need to talk about how system API works. For example, we can use `PackageManager#getInstalledApplications` to get the app list. This is actually an interprocess communication (IPC) process of the app process and system server process, just the Android framework did the inner works for us. Android uses `Binder` to do this type of IPC. `Binder` allows the server-side to learn the uid and pid of the client-side so that the system server can check if the app has the permission to do the operation.
+* **Global Auto-Grant Toggle:** A quick-toggle action directly in the management toolbar to automatically grant root permissions to requesting applications via secure, privileged IPC without prompting each time.
+* **Material Design 3 (M3) Permission Dialogs:** Complete redesign of the interactive authorization window featuring stacked dynamic actions, high-contrast denial buttons, centered adaptive badges, and immediate touch responsiveness.
+* **Persistent SQLite Database:** Permissions and global preferences are securely maintained in `/data/system/sui` owned directly by `system_server`, eliminating permission resets across device reboots.
+* **Instant Cold-Start & App Caching:** Integrated `AppInfoCache` alongside synchronous list rendering and `DiffUtil` for instant loading without UI freezing or blank screens.
+* **Android 16 Compatibility & Diagnostics:** Enhanced internal binder probes, server identity validation, and diagnostic logging for newer Android versions.
 
-Back to "su", there are commands provided by the Android system. In the same example, to get the app list with "su", we have to use `pm list`. This is too painful.
+---
 
-1. Text-based, this means there is no structured data like `PackageInfo` in Java. You have to parse the output text.
-2. It is much slower because run a command means at least one new process is started. And `PackageManager#getInstalledApplications` is used inside `pm list`.
-3. The possibility is limited to how the command can do. The command only covers a little amount of Android APIs.
+## User Guide
 
-Although it is possible to use Java APIs as root with `app_process` (there are libraries like libsu and librootjava), transfer binder between app process and root process is painful. If you want the root process to run as a daemon. When the app process restarts, it has no cheap way to get the binder of the root process.
+### Requirements
+- A rooted Android device running Magisk, KernelSU, or APatch (Zygisk environment supported).
+- Android 8.0 (API 26) through Android 16+.
 
-In fact, for Magisk and other root solutions, makes the "su" to work is not that easy as some people think (let "su" itself work and the communication between the "su" and the manager app have a lot of unhappy work behind).
+### Installation
+1. Download the latest compiled release ZIP (`Sui-v18.9.15.zip`).
+2. Flash the module through your root manager (Magisk / KernelSU / APatch).
+3. Reboot your device.
 
-</details>
+### Accessing Management UI
+- **Settings Shortcut (Android 8.0+):** Long-press the "Settings" icon from your launcher to access the Sui shortcut.
+- **Developer Options:** Open Developer Options in System Settings to trigger the management shortcut prompt.
+- **Dialer Code:** Dial `*#*#784784#*#*` in your default phone dialer.
 
-## User guide
+### Interactive Shell (`rish`)
+Sui includes an interactive root shell client. Because Sui does not place binaries in system `PATH`, configure your execution scripts using the internal environment:
+- Review configuration templates inside `/data/system/sui`.
+- Execute commands via `rish` as you would with standard `sh`.
 
-Note, the behavior of existing apps that only supports "su" will NOT change.
+---
 
-### Install
+## Application Development Guide
 
-You can download and install Sui from Magisk directly. Or, download the zip from [release](https://github.com/RikkaApps/Sui/releases/) and use "Install from storage" in Magisk.
+To integrate Sui/Shizuku API into your application:
+- Repository: [Shizuku-API](https://github.com/k10halifa/Shizuku-API)
 
-### Management UI
+---
 
-- (Android 8.0+, Sui 12.1+) Long press system settings from the home app, you will find the shortcut of Sui
-- (Android 8.0+, Sui 12+) Enter "Developer options" in system settings, the system will ask you to add the shortcut of Sui
-- Enter `*#*#784784#*#*` in the default dialer app
+## Building from Source
 
-Note, the shortcut way requires your home app supports shortcut APIs that adds from Android 7.0 and 8.0. Unless you are using a old home app, you can the shortcut with no problem.
+### Prerequisites
+- JDK 17
+- Android SDK & NDK
+- Gradle 8.0 wrapper
+- SDKMAN (recommended)
 
-### Interactive shell
-
-Sui provides interactive shell.
-
-Since Sui does not add files to `PATH`, the files need to be copied manually. See `/data/adb/sui/post-install.example.sh` to learn how to do this automatically.
-
-After the files are correctly copied, use `rish` as 'sh'.
-
-## Application development guide
-
-https://github.com/k10halifa/Shizuku-API
-
-## Build
-
-Clone with `git clone --recurse-submodules`.
-
-The project uses Java 17 with the Gradle 8.0 wrapper. With SDKMAN installed, run `sdk env install` and `sdk env` from the project directory before building.
-
-Gradle tasks:
-
-`Flavor` could be `Riru` and `Zygisk`, and `BuildType` could be `Debug` and `Release`.
-
-* `:module:assemble<Flavor><BuildType>`
-
-   Generate Magisk module zip to `out`.
-
-* `:module:push<Flavor><BuildType>`
-
-   Push the zip with adb to `/data/local/tmp`.
-
-* `:module:flash<Flavor><BuildType>`
-
-   Install the zip with `adb shell su -c magisk --install-module`.
-
-* `:module:flashAndReboot<Flavor><BuildType>`
-
-   Install the zip and reboot the device.
-
-For KernelSU, the module's Action button reports whether the Sui service process is running. Boot and service-hook diagnostics are appended to `/data/local/tmp/sui_debug.log`.
-
-## Internals
-
-Sui requires [Magisk](https://github.com/topjohnwu/Magisk) (and [Riru](https://github.com/RikkaApps) for non-Zygisk version). Magisk allows us to run processes as uid 0 and a "do anything" SELinux context. Riru or Zygisk allows us to inject into system server process and app processes.
-
-In short, there are four parts:
-
-- Root process
-
-  This is a root process started by Magisk. This process starts a Java server that implements Shizuku API and private APIs used by other parts.
-
-- SystemServer inject
-
-  - Hooks `Binder#execTransact` and finally allow us to handle an unused binder call
-  - Implements "get binder", "set binder" logic in that binder call, so that root process can send its binder to the system server, and the apps can acquire root process's binder
-
-- SystemUI inject
-
-  - Acquire the fd of our apk from the root server, create a `Resource` instance from it
-  - Show confirmation window with our `Resource` and `ClassLoader` when recevied callback from the root server
-
-- Settings inject
-
-  - Acquire the fd of our apk from the root server, create a `Resource` instance from it
-  - Publish shortcut which targets an existing `Acitivty` but with a special intent extra
-  - Replace `ActivityThread#mInstrumentation` to intervene the `Acitivty` instantiate process, if the intent has the speical extra, create our `Activity` which uses our `Resource` and `ClassLoader`
+Clone the repository recursively:
+```bash
+git clone --recurse-submodules <YOUR_REPOSITORY_URL>
+cd Sui
